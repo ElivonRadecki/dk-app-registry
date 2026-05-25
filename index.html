@@ -141,40 +141,21 @@
 <div class="footer-area">
   <div class="footer-inner">
 
-    <!-- FEEDBACK / COMMENTS -->
+    <!-- FEEDBACK FORM -->
     <div class="comments-section">
-      <h2 class="comments-heading">Feedback & suggestions</h2>
-      <p class="comments-intro">Missing an app? Found outdated information? Leave a comment below — this registry is a living document and community input is welcome.</p>
-      <div id="giscus-container">
-        <!--
-          GISCUS SETUP — 3 steps:
-          1. Go to your GitHub repo → Settings → Features → check "Discussions"
-          2. Replace YOUR-USERNAME and YOUR-REPO-NAME below with your actual values
-          3. Save and push — comments will appear immediately
-
-          Everything else is pre-configured and ready to go.
-        -->
-        <script src="https://giscus.app/client.js"
-          data-repo="ElivonRadecki/dk-app-registry"
-          data-repo-id="R_kgDOSiOyUQ"
-          data-category="General"
-          data-category-id="DIC_kwDOSiOyUc4C9Z9q"
-          data-mapping="pathname"
-          data-strict="0"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="bottom"
-          data-theme="preferred_color_scheme"
-          data-lang="en"
-          crossorigin="anonymous"
-          async>
-        </script>
-        <noscript>
-          <div class="giscus-placeholder">
-            <span>💬</span>
-            <p>Enable JavaScript to load the comments section.</p>
-          </div>
-        </noscript>
+      <h2 class="comments-heading">Suggest an app</h2>
+      <p class="comments-intro">Know an app that should be on this list? Fill in the form below — suggestions are reviewed and added manually.</p>
+      <div style="border-radius: 8px; overflow: hidden; border: 1.5px solid #e4dfd7;">
+        <iframe
+          src="https://docs.google.com/forms/d/e/1FAIpQLSfBxd9BvBqwVLvUCw6/viewform?embedded=true"
+          width="100%"
+          height="520"
+          frameborder="0"
+          marginheight="0"
+          marginwidth="0"
+          style="display:block;">
+          Loading form…
+        </iframe>
       </div>
     </div>
 
@@ -208,11 +189,11 @@ const categoryIcons = {
   "Transport": "🚆",
   "Libraries & Culture": "📚",
   "Nature & Outdoors": "🌿",
-  "Events & Culture": "🎭",
+  "Events & Leisure": "🎭",
   "Food & Shopping": "🛒",
   "Danish Language & Classes": "🇩🇰",
   "News & Media": "📰",
-  "Utilities & Home": "🔌",
+  "Waste & Environment": "🔌",
   "Waste & Environment": "♻️",
   "Mental Health & Wellbeing": "🧠",
   "Minorities & Community Support": "🤝",
@@ -222,7 +203,7 @@ const categoryIcons = {
   "Housing": "🏠",
 };
 
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUTqmi_EtItH6PlhjoT790bG9ulEDO6R9jqz0ko3k9cUSFgmULC12Bw15UoXDXmBB_vPubdct4o4bW/pub?gid=1288350490&single=true&output=csv';
+const SHEET_CSV_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vTUTqmi_EtItH6PlhjoT790bG9ulEDO6R9jqz0ko3k9cUSFgmULC12Bw15UoXDXmBB_vPubdct4o4bW/pub?gid=1288350490&single=true&output=csv');
 
 const priorityLabelToKey = { 'Must-have':'critical', 'Essential':'high', 'Useful':'medium', 'Optional':'optional' };
 
@@ -429,5 +410,6 @@ function render() {
 
 loadData();
 </script>
+<script data-goatcounter="https://danishappregistry.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
