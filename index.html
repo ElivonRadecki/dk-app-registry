@@ -210,7 +210,9 @@ const categoryIcons = {
   "Nature & Outdoors": "🌿",
   "Events & Culture": "🎭",
   "Food & Shopping": "🛒",
-  "Language & Learning": "💬",
+  "Danish Language & Classes": "🇩🇰",
+  "News & Media": "📰",
+  "Utilities & Home": "🔌",
   "Waste & Environment": "♻️",
   "Mental Health & Wellbeing": "🧠",
   "Minorities & Community Support": "🤝",
@@ -220,131 +222,101 @@ const categoryIcons = {
   "Housing": "🏠",
 };
 
-const apps = [
-  // DIGITAL IDENTITY & GOVERNMENT
-  { name:"MitID", category:"Digital Identity & Government", description:"Denmark's mandatory digital identity solution. Used to authenticate to all public services, banking, and most private services. Replaces the old NemID system.", platforms:["iOS","Android"], requirements:["CPR number","Danish phone number","Activation via bank or citizen service"], priority:"critical", url:"https://www.mitid.dk/en-gb/" },
-  { name:"e-Boks", category:"Digital Identity & Government", description:"Denmark's official secure digital mailbox. All government agencies, banks, and utilities send legally binding documents here. Mandatory to check regularly.", platforms:["iOS","Android","Web"], requirements:["CPR number","MitID"], priority:"critical", url:"https://www.e-boks.com/denmark/en/" },
-  { name:"Mit.dk", category:"Digital Identity & Government", description:"The official citizen portal aggregating public digital mail (DigitalPost) and self-service from all Danish municipalities and agencies. Unified inbox alongside e-Boks.", platforms:["iOS","Android","Web"], requirements:["CPR number","MitID"], priority:"critical", url:"https://www.mit.dk" },
-  { name:"DigitalPost", category:"Digital Identity & Government", description:"The underlying system for receiving official government mail in Denmark. Accessible through Mit.dk or e-Boks. All residents with a CPR number are automatically enrolled.", platforms:["Web","iOS","Android"], requirements:["CPR number","MitID"], priority:"critical", url:"https://digitalpost.dk" },
-  { name:"Borger.dk", category:"Digital Identity & Government", description:"The main Danish government self-service portal. Handle address changes, access public records, apply for benefits, and navigate all public services. Available in English.", platforms:["Web"], requirements:["CPR number","MitID (for most services)"], priority:"critical", url:"https://www.borger.dk" },
-  { name:"SKAT (TastSelv)", category:"Digital Identity & Government", description:"The Danish Tax Agency's self-service portal. View and adjust your tax card (skattekort), check tax returns, update income estimates, and receive refunds. Mandatory for all residents.", platforms:["iOS","Android","Web"], requirements:["CPR number","MitID"], priority:"critical", url:"https://skat.dk" },
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTUTqmi_EtItH6PlhjoT790bG9ulEDO6R9jqz0ko3k9cUSFgmULC12Bw15UoXDXmBB_vPubdct4o4bW/pub?gid=1288350490&single=true&output=csv';
 
-  // HEALTH
-  { name:"Sundhedskortet", category:"Health", description:"Your digital health insurance card (yellow card). Shows your GP's name and contact info — required at all medical appointments. The digital version lives in the Sundhed.dk app. It also doubles as your library card once you register at a public library, and the same login credentials are used for digital libraries Ereolen and Libby.", platforms:["iOS","Android","Web (Sundhed.dk)"], requirements:["CPR number","Registered GP in Denmark","MitID","Library registration (for library access)"], priority:"critical", url:"https://www.sundhed.dk" },
-  { name:"Min Sundhedsplatform", category:"Health", description:"Patient portal for the Capital Region (Region Hovedstaden) and Zealand (Region Sjælland). View medical records, test results, referrals, and hospital appointments.", platforms:["iOS","Android","Web"], requirements:["CPR number","MitID","Patient registered in Region H or Region Sjælland"], priority:"high", url:"https://www.minsundhedsplatform.dk" },
-  { name:"Sundhed.dk", category:"Health", description:"Denmark's national health portal. Book GP appointments, view prescriptions and medical history, access your health insurance card (sundhedskortet), and communicate with your doctor.", platforms:["iOS","Android","Web"], requirements:["CPR number","MitID"], priority:"high", url:"https://www.sundhed.dk" },
+const priorityLabelToKey = { 'Must-have':'critical', 'Essential':'high', 'Useful':'medium', 'Optional':'optional' };
 
-  // PAYMENTS & BANKING
-  { name:"MobilePay", category:"Payments & Banking", description:"Denmark's dominant mobile payment platform. Used everywhere: splitting bills, paying at markets, cafés, small shops, rent, and between individuals. Nearly ubiquitous.", platforms:["iOS","Android"], requirements:["Danish phone number","Danish bank account or international card (limited features)"], priority:"critical", url:"https://www.mobilepay.dk/en" },
+function parseCSV(text) {
+  const lines = text.split('\n');
+  const headers = parseCSVRow(lines[0]);
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = parseCSVRow(line);
+    const row = {};
+    headers.forEach((h, i) => row[h.trim()] = (vals[i] || '').trim());
+    return row;
+  });
+}
 
-  // TRANSPORT
-  { name:"Rejseplanen", category:"Transport", description:"Denmark's official nationwide journey planner for all public transport: buses, trains, metro, and light rail. Real-time departures and route planning across the entire country.", platforms:["iOS","Android","Web"], requirements:["None"], priority:"critical", url:"https://www.rejseplanen.dk/en" },
-  { name:"Rejsekort", category:"Transport", description:"App for Denmark's national transit card system. Load credit, check-in/check-out on public transport, view travel history, and top up. The physical card covers all of Denmark; the app enables contactless check-in via phone.", platforms:["iOS","Android"], requirements:["Registered Rejsekort (physical or app-based)","Credit/debit card for top-up"], priority:"high", url:"https://www.rejsekort.dk/en" },
-  { name:"Rejsebilletten", category:"Transport", description:"The primary app for buying single tickets and passes for buses, metro, S-tog, and regional trains in Copenhagen and throughout Denmark. Replacing the older DOT Tickets app.", platforms:["iOS","Android"], requirements:["Credit/debit card"], priority:"high", url:"https://dinoffentligetransport.dk" },
-  { name:"DSB", category:"Transport", description:"Official app for Danish State Railways. Buy intercity train tickets, check live departures, book seat reservations, and get travel updates. Covers routes across Denmark and to Germany/Sweden.", platforms:["iOS","Android"], requirements:["Credit/debit card (account optional)"], priority:"high", url:"https://www.dsb.dk/en/" },
-  { name:"GreenMobility", category:"Transport", description:"Electric car-sharing service operating in Copenhagen and Aarhus. Rent by the minute with no fixed base — pick up and drop off anywhere in the zone.", platforms:["iOS","Android"], requirements:["Valid driver's license","Credit card","Account registration"], priority:"optional", url:"https://www.greenmobility.com" },
-  { name:"GoMore", category:"Transport", description:"Peer-to-peer ride-sharing and car rental platform popular in Denmark. Useful for intercity travel or renting a car from a private owner.", platforms:["iOS","Android","Web"], requirements:["Account","Driver's license (for renting)"], priority:"optional", url:"https://gomore.dk/en" },
+function parseCSVRow(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
 
-  // LIBRARIES & CULTURE
-  { name:"@Reolen (Ereolen)", category:"Libraries & Culture", description:"Denmark's national platform for borrowing e-books and audiobooks in Danish. Free with a library registration. Log in with the same credentials as your Sundhedskortet library card (CPR number + PIN set at the library).", platforms:["iOS","Android","Web"], requirements:["Library registration at a Danish public library (free with CPR number)","Library PIN (set at registration)"], priority:"medium", url:"https://ereolen.dk" },
-  { name:"Libby", category:"Libraries & Culture", description:"International e-book and audiobook borrowing app. Works with Danish public libraries for English-language and international collections. Free — uses the same library credentials as Ereolen and your Sundhedskortet library card.", platforms:["iOS","Android"], requirements:["Library registration at a participating Danish library","Library PIN"], priority:"medium", url:"https://libbyapp.com" },
+function rowToApp(row) {
+  const visible = (row['Visible (TRUE/FALSE)'] || 'TRUE').toUpperCase();
+  if (visible === 'FALSE') return null;
+  const priorityRaw = row['Priority'] || '';
+  return {
+    name:         row['Name'] || '',
+    category:     row['Category'] || '',
+    description:  row['Description'] || '',
+    platforms:    (row['Platforms'] || '').split(';').map(s => s.trim()).filter(Boolean),
+    requirements: (row['Requirements'] || '').split(';').map(s => s.trim()).filter(Boolean),
+    priority:     priorityLabelToKey[priorityRaw] || 'medium',
+    url:          row['URL'] || null,
+  };
+}
 
-  // NATURE & OUTDOORS
-  { name:"Shelter (Friluftsguiden)", category:"Nature & Outdoors", description:"Directory of Denmark's public shelters, camping spots, fire sites, and nature access points. Invaluable for weekend hiking and outdoor trips. Part of the broader Friluftsliv infrastructure.", platforms:["iOS","Android","Web"], requirements:["None"], priority:"medium", url:"https://www.naturstyrelsen.dk" },
-  { name:"DMI (Danish Meteorological Institute)", category:"Nature & Outdoors", description:"Official Danish weather service. Accurate hyperlocal forecasts, storm warnings, and UV index. More reliable than international weather apps for Danish conditions.", platforms:["iOS","Android","Web"], requirements:["None"], priority:"high", url:"https://www.dmi.dk/en/" },
-  { name:"København Havn (Harbour Baths)", category:"Nature & Outdoors", description:"App for checking water quality and opening status of Copenhagen's harbour baths and swim spots. Includes Havnebadet Islands Brygge, Sluseholmen, and others.", platforms:["iOS","Android"], requirements:["None"], priority:"optional", url:"https://www.kk.dk/havnebad" },
+let apps = [];
+let categoryOrder = [];
 
-  // EVENTS & CULTURE
-  { name:"KultuNaut", category:"Events & Culture", description:"Denmark's largest cultural and event calendar, running since 1996. Lists everything from small local flea markets and community fairs to concerts, festivals, and exhibitions across the entire country. Searchable by genre, date, and location.", platforms:["iOS","Android","Web"], requirements:["None"], priority:"high", url:"https://www.kultunaut.dk" },
-  { name:"ByMarkeder.dk", category:"Events & Culture", description:"Dedicated directory of flea markets, craft markets, and recurring events across Denmark. Good Copenhagen coverage — lists dates, locations, and opening hours for markets like Israels Plads (Loppetorv), Veras Market, Byens Lopper, Remisen, and more.", platforms:["Web"], requirements:["None"], priority:"medium", url:"https://bymarkeder.dk/en" },
-  { name:"Visit Copenhagen (app)", category:"Events & Culture", description:"Official city guide from Copenhagen's tourism organisation. Curated recommendations for events, restaurants, and attractions with an interactive map. Useful for discovering new neighbourhoods and upcoming cultural events as a newcomer.", platforms:["iOS","Android"], requirements:["None"], priority:"medium", url:"https://www.visitcopenhagen.com" },
-  { name:"Facebook Events / Groups", category:"Events & Culture", description:"Still the dominant platform for local community events in Copenhagen: neighbourhood buy/sell groups, expat communities, spontaneous gatherings, and recurring flea markets. Groups like 'Copenhagen Expats', 'Loppemarked København', and neighbourhood groups are heavily used.", platforms:["iOS","Android","Web"], requirements:["Facebook account"], priority:"high", url:"https://www.facebook.com" },
-  { name:"Meetup", category:"Events & Culture", description:"International platform with an active Copenhagen scene. Good for finding language exchange groups, sports clubs, professional networking, and hobby-based communities — especially useful when building a social network from scratch.", platforms:["iOS","Android","Web"], requirements:["Account (free tier available)"], priority:"medium", url:"https://www.meetup.com" },
-  { name:"Ticketmaster DK", category:"Events & Culture", description:"Primary ticket platform for major concerts, theatre, sports, and festivals in Denmark. Most larger venues (Royal Arena, Royal Danish Theatre, etc.) sell through Ticketmaster.", platforms:["iOS","Android","Web"], requirements:["Account","Payment method"], priority:"medium", url:"https://www.ticketmaster.dk" },
-  { name:"Billetto", category:"Events & Culture", description:"Danish-origin event and ticket platform covering smaller and mid-size events: art shows, pop-up markets, workshops, club nights, and community events that don't go through Ticketmaster. Very active Copenhagen listings.", platforms:["iOS","Android","Web"], requirements:["Account (free for browsing)","Payment method for tickets"], priority:"medium", url:"https://billetto.dk/en" },
+function initFilters() {
+  categoryOrder = [...new Set(apps.map(a => a.category))];
+  const catSelect = document.getElementById('catFilter');
+  // Clear existing options except "All"
+  while (catSelect.options.length > 1) catSelect.remove(1);
+  categoryOrder.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = (categoryIcons[c] || '') + ' ' + c;
+    catSelect.appendChild(opt);
+  });
+}
 
-  // FOOD & SHOPPING
-  { name:"Too Good To Go", category:"Food & Shopping", description:"Surplus food app with very strong adoption in Denmark. Buy unsold food from restaurants, bakeries, and supermarkets at a steep discount. Reduces waste, saves money.", platforms:["iOS","Android"], requirements:["Account","Payment method"], priority:"medium", url:"https://toogoodtogo.com/en-dk" },
-  { name:"Salling Group (Bilka/Føtex/Netto)", category:"Food & Shopping", description:"App for Denmark's dominant supermarket group. Browse offers, collect loyalty points (Salling-fordele), and find store locations across Bilka, Føtex, and Netto.", platforms:["iOS","Android"], requirements:["Account"], priority:"medium", url:"https://sallinggroup.com" },
-  { name:"Coop / CoopMedlem", category:"Food & Shopping", description:"App for the Coop cooperative (Irma, Kvickly, SuperBrugsen, Fakta). Membership gives discounts, personalised offers, and weekly bonus. Very widely used.", platforms:["iOS","Android"], requirements:["Coop membership (free)","CPR number recommended"], priority:"medium", url:"https://coop.dk" },
-  { name:"Wolt", category:"Food & Shopping", description:"Food and grocery delivery platform with strong coverage across Copenhagen and other Danish cities. Widely used alongside Just Eat — often favoured for faster delivery and a broader range of restaurants and convenience stores.", platforms:["iOS","Android"], requirements:["Account","Payment method"], priority:"medium", url:"https://wolt.com/da/dnk" },
-  { name:"Just Eat", category:"Food & Shopping", description:"The dominant food delivery platform in Denmark. Wide restaurant coverage across Copenhagen and other cities.", platforms:["iOS","Android"], requirements:["Account","Payment method"], priority:"optional", url:"https://www.just-eat.dk" },
+function showLoading() {
+  document.getElementById('content').innerHTML = `
+    <div class="empty" style="padding:80px 0">
+      <div style="font-size:28px;margin-bottom:12px">⏳</div>
+      <div>Loading registry…</div>
+    </div>`;
+}
 
-  // LANGUAGE & LEARNING
-  { name:"Duolingo", category:"Language & Learning", description:"Popular gamified language learning app. The Danish course is a good starter for vocabulary and basic grammar — best used as a daily supplement to formal Danish classes.", platforms:["iOS","Android","Web"], requirements:["None (free tier available)"], priority:"medium", url:"https://www.duolingo.com" },
-  { name:"DR (Danish Broadcasting Corporation)", category:"Language & Learning", description:"App for Denmark's public broadcaster. Access live TV, radio, and on-demand content. Danish subtitles available on many shows — invaluable for language immersion. Free to use.", platforms:["iOS","Android","Web"], requirements:["None (free)"], priority:"medium", url:"https://www.dr.dk" },
-  { name:"Mofibo", category:"Language & Learning", description:"Danish e-book and audiobook subscription service (similar to Storytel). Good for Danish literature and language immersion. Requires a paid subscription.", platforms:["iOS","Android"], requirements:["Paid subscription"], priority:"optional", url:"https://mofibo.com" },
+function showError() {
+  document.getElementById('content').innerHTML = `
+    <div class="empty" style="padding:80px 0;color:#c8102e">
+      <div style="font-size:28px;margin-bottom:12px">⚠️</div>
+      <div>Could not load the registry. Please try refreshing the page.</div>
+    </div>`;
+}
 
-  // WASTE & ENVIRONMENT
-  { name:"AffaldApp (municipal waste app)", category:"Waste & Environment", description:"Most Danish municipalities provide a local waste and recycling app. Shows collection schedules for different waste fractions and locations of recycling stations. Check your municipality's specific app (e.g. Copenhagen's is 'Affald København').", platforms:["iOS","Android"], requirements:["Address in Denmark"], priority:"medium", url:null },
-
-  // MENTAL HEALTH & WELLBEING
-  { name:"Psykiatrifonden (helpline)", category:"Mental Health & Wellbeing", description:"Denmark's main mental health foundation. Free, confidential phone and chat helpline covering anxiety, depression, loneliness, grief, and crisis. Phone: 39 25 25 25 (daily 10:00–14:00). English-speaking counsellors are available.", platforms:["Web","Phone"], requirements:["None — anonymous and free"], priority:"high", url:"https://www.psykiatrifonden.dk" },
-  { name:"Livslinien", category:"Mental Health & Wellbeing", description:"Denmark's national suicide prevention organisation. 24/7 crisis phone line (70 201 201) and online chat. Anonymous and free. For anyone in acute psychological distress or crisis, regardless of immigration status.", platforms:["Web","Phone"], requirements:["None — anonymous and free"], priority:"high", url:"https://www.livslinien.dk" },
-  { name:"Headspace DK", category:"Mental Health & Wellbeing", description:"Publicly funded drop-in counselling centres for young people aged 12–25. Free, anonymous, no referral or appointment needed — walk in or chat online. Physical centres in Copenhagen, Aarhus, Odense, and other cities. Not the same as the international meditation app.", platforms:["Web (chat)","In-person"], requirements:["None — aged 12–25"], priority:"high", url:"https://headspace.dk" },
-  { name:"Internetpsykiatrien", category:"Mental Health & Wellbeing", description:"Official Danish digital therapy platform for adults with mild-to-moderate anxiety, depression, or OCD. Provides structured self-guided CBT programmes online, free with a GP referral. Available in Danish only.", platforms:["Web"], requirements:["CPR number","GP referral","Danish language"], priority:"medium", url:"https://www.internetpsykiatrien.dk" },
-  { name:"findpsykolog.dk", category:"Mental Health & Wellbeing", description:"Directory of licensed psychologists in Denmark run by the Danish Psychological Association. Searchable by location, language, and specialisation. Key resource for finding English-speaking or multilingual therapists.", platforms:["Web"], requirements:["None (GP referral needed for subsidised sessions)"], priority:"high", url:"https://www.findpsykolog.dk" },
-  { name:"ADHD-foreningen", category:"Mental Health & Wellbeing", description:"Denmark's national ADHD association. Offers telephone counselling, local chapter events, and information for adults and families navigating ADHD in Denmark — including guidance on diagnosis pathways, workplace rights, and schooling. Primarily in Danish.", platforms:["Web"], requirements:["None"], priority:"medium", url:"https://adhd.dk/english" },
-  { name:"Angstlinjen", category:"Mental Health & Wellbeing", description:"Free helpline for people struggling with anxiety and panic disorders. Phone: 70 27 27 67. Operated by Angstforeningen. Counselling in Danish; the website has some English content.", platforms:["Web","Phone"], requirements:["None — anonymous and free"], priority:"medium", url:"https://angstlinjen.dk" },
-  { name:"1813 (Akut psykiatri – Copenhagen)", category:"Mental Health & Wellbeing", description:"The 24/7 medical helpline for the Capital Region. For psychiatric crises, call 1813 before going to an emergency room — they can triage and direct you to the right level of care. Outside Copenhagen, call your regional equivalent.", platforms:["Phone"], requirements:["None — available to anyone in the Capital Region"], priority:"critical", url:"https://www.akuttelefon.dk" },
-
-  // MINORITIES & COMMUNITY SUPPORT
-  { name:"International House Copenhagen (IHC)", category:"Minorities & Community Support", description:"The single most important first stop for newcomers to Copenhagen. A one-stop centre at Nyropsgade 1 (near Central Station) where you can handle CPR registration, EU residence documents (SIRI), MitID setup, health card, and tax card — all under one roof, in English, free of charge. Covers Copenhagen and 37 partner municipalities. Book an appointment online before arriving.", platforms:["In-person","Web (appointment booking)"], requirements:["Valid passport or national ID","Proof of address in Denmark","Residence permit (non-EU citizens)"], priority:"critical", url:"https://ihcph.kk.dk" },
-  { name:"New to Denmark (Ny i Danmark)", category:"Minorities & Community Support", description:"Official Danish government portal for immigrants and refugees. Covers visas, residence permits, integration requirements, Danish language courses, and rights. Available in English, Arabic, Ukrainian, and other languages.", platforms:["Web"], requirements:["None"], priority:"critical", url:"https://www.nyidanmark.dk/en-GB" },
-  { name:"SIRI (Danish Agency for International Recruitment)", category:"Minorities & Community Support", description:"The government agency handling work and residence permits for non-EU citizens, and overseeing integration programmes. Track permit applications, find integration programme information, and access official guidance for newly arrived residents.", platforms:["Web"], requirements:["None (account for tracking applications)"], priority:"high", url:"https://www.nyidanmark.dk/en-GB/You-want-to-apply/SIRI" },
-  { name:"Diskriminationslinjen", category:"Minorities & Community Support", description:"Free legal counselling helpline for anyone who has experienced discrimination in Denmark — on grounds of race, ethnicity, gender, sexuality, disability, religion, or age. Run by the Danish Institute for Human Rights. Phone: 32 69 86 66 (Mon–Thu 12:00–15:00). Also reachable by email.", platforms:["Web","Phone"], requirements:["None — free and confidential"], priority:"high", url:"https://menneskeret.dk/the-discrimination-helpline" },
-  { name:"LGBT+ Danmark", category:"Minorities & Community Support", description:"Denmark's main LGBTQ+ organisation. Offers free counselling by phone, email, chat, and in-person sessions for LGBTQ+ individuals. Runs events, advocacy, and a social community in Copenhagen and Aarhus. Services in Danish and English.", platforms:["iOS","Android","Web"], requirements:["None"], priority:"high", url:"https://lgbt.dk/english" },
-  { name:"LGBT Asylum", category:"Minorities & Community Support", description:"NGO providing support, counselling, and community for LGBTQ+ refugees and asylum seekers in Denmark. Monthly social events in Copenhagen and Aarhus, legal guidance through the asylum process, and a peer network. Founded 2012.", platforms:["Web"], requirements:["None"], priority:"medium", url:"https://www.lgbtasylum.dk" },
-  { name:"Røde Kors (Danish Red Cross)", category:"Minorities & Community Support", description:"The Danish Red Cross runs psychosocial support programmes for refugees, asylum seekers, and vulnerable newcomers. Services include conversation groups, crisis support, volunteer networks, and integration activities. Available in multiple languages.", platforms:["Web"], requirements:["None"], priority:"medium", url:"https://www.rodekors.dk/english" },
-  { name:"Ethnic Minority Counselling (kommunal rådgivning)", category:"Minorities & Community Support", description:"Most Danish municipalities offer free counselling services specifically for ethnic minorities, covering integration, language barriers, family issues, and social rights. Contact your local Borgerservice for the relevant office.", platforms:["In-person","Phone"], requirements:["Residency in the municipality"], priority:"medium", url:"https://www.kk.dk/borger/sociale-tilbud" },
-
-  // ACCESSIBILITY & SPECIAL NEEDS
-  { name:"Nota Bibliotek", category:"Accessibility & Special Needs", description:"State library for people with print disabilities — including blindness, visual impairment, and dyslexia. Provides audiobooks, e-books, and Braille material free of charge. Requires documented eligibility; apply via nota.dk.", platforms:["iOS","Android","Web"], requirements:["Documented print disability","Registration at nota.dk"], priority:"high", url:"https://nota.dk" },
-  { name:"Lige adgang", category:"Accessibility & Special Needs", description:"App listing accessibility information for places across Denmark — including wheelchair access, accessible toilets, hearing loops, and parking. Covers attractions, restaurants, and public spaces. Interface is in Danish.", platforms:["iOS","Android"], requirements:["None"], priority:"medium", url:"https://www.ligeadgang.dk" },
-  { name:"Be My Eyes", category:"Accessibility & Special Needs", description:"International app connecting visually impaired users with sighted volunteers or AI via live video. Useful for reading labels, navigating unfamiliar spaces, or handling mail. Widely used in Denmark and fully available in Danish.", platforms:["iOS","Android"], requirements:["None"], priority:"high", url:"https://www.bemyeyes.com" },
-  { name:"Flexhandicap / Handicapkørsel", category:"Accessibility & Special Needs", description:"Municipally approved individual transport scheme for people with disabilities who cannot use regular public transport. Operated region-by-region. Not a single national app — each regional operator has its own booking system. Apply for eligibility through your kommune first.", platforms:["Web (varies by region)","Phone booking"], requirements:["Municipal approval (visitering)","CPR number"], priority:"high", url:"https://www.moviatrafik.dk/handicapkoersel" },
-  { name:"Borger.dk – Disability Services", category:"Accessibility & Special Needs", description:"The main portal for applying for disability-related public support: assistive devices, home assistance (hjemmehjælp), personal assistance schemes, and housing adaptations. Your municipality's Handicap & Psykiatri department handles casework.", platforms:["Web"], requirements:["CPR number","MitID"], priority:"high", url:"https://www.borger.dk/handicap" },
-  { name:"Danske Handicaporganisationer (DH)", category:"Accessibility & Special Needs", description:"Umbrella organisation for 34 Danish disability associations. The main entry point for finding the relevant organisation for your specific disability — whether physical, sensory, cognitive, or psychiatric.", platforms:["Web"], requirements:["None"], priority:"medium", url:"https://www.handicap.dk" },
-
-  // FAMILY & CHILDREN
-  { name:"Aula", category:"Family & Children", description:"Denmark's mandatory national communication platform between parents and all public daycare institutions, schools, and after-school programs (SFO). Used for daily activity updates, messages from teachers, schedules, photo sharing, and documents. Over 2.3 million users across all 98 municipalities.", platforms:["iOS","Android","Web"], requirements:["CPR number","MitID","Child enrolled in a Danish daycare or school"], priority:"critical", url:"https://www.aula.dk" },
-  { name:"Pladsanvisningen", category:"Family & Children", description:"Copenhagen municipality's online system for applying for and managing childcare placements (vuggestue, børnehave, dagpleje, SFO). Register your child on the waiting list as early as possible — demand for spots, especially for under-3s, can be high. Other municipalities have equivalent systems.", platforms:["Web"], requirements:["CPR number","MitID","Child registered in Copenhagen municipality"], priority:"high", url:"https://www.kk.dk/pladsanvisningen" },
-  { name:"MinUddannelse", category:"Family & Children", description:"Digital platform for upper-secondary and vocational education in Denmark. Used by students aged ~15+ for assignments, schedules, grades, and communication with teachers. Relevant for parents of older children transitioning out of Folkeskole.", platforms:["iOS","Android","Web"], requirements:["Student enrollment in a participating institution","UNI-login"], priority:"medium", url:"https://www.minuddannelse.net" },
-  { name:"Meebook", category:"Family & Children", description:"Digital learning and reading platform widely used in Danish primary schools (Folkeskole). Children access school books, reading materials, and assignments here. Parents may be given read access through Aula or the school.", platforms:["iOS","Android","Web"], requirements:["UNI-login (provided by the school)","School enrollment"], priority:"medium", url:"https://meebook.com" },
-  { name:"Sundhed.dk (children's vaccinations)", category:"Family & Children", description:"Denmark's national childhood vaccination programme is free and tracked through Sundhed.dk. Parents can view their child's vaccination history, receive reminders, and book appointments with the GP. The standard programme covers 10 vaccines from age 3 months to 12 years.", platforms:["iOS","Android","Web"], requirements:["CPR number for both parent and child","MitID"], priority:"high", url:"https://www.sundhed.dk" },
-  { name:"Familieretshuset", category:"Family & Children", description:"Official portal for matters of family law in Denmark: parental authority (forældremyndighed), child support (børnebidrag), and custody arrangements. Relevant for separated or international families navigating Danish family law.", platforms:["Web"], requirements:["CPR number","MitID"], priority:"medium", url:"https://familieretshuset.dk/en" },
-
-  // WORK & EMPLOYMENT
-  { name:"Jobindex", category:"Work & Employment", description:"Denmark's largest private job board, covering all industries and experience levels. Has an English-language version. Aggregates listings from company websites, recruitment agencies, and direct postings. The first stop for most job seekers alongside LinkedIn.", platforms:["iOS","Android","Web"], requirements:["None (account for applying and CV upload)"], priority:"high", url:"https://www.jobindex.dk/en" },
-  { name:"The Hub", category:"Work & Employment", description:"Job platform focused on startups, tech, and international companies in the Nordics. Strong Copenhagen coverage. Many listings are in English and many roles don't require Danish. Well-suited for professionals in tech, product, design, and marketing.", platforms:["Web"], requirements:["Account"], priority:"high", url:"https://www.thehub.io" },
-  { name:"Jobnet.dk", category:"Work & Employment", description:"The Danish government's official public job portal. Mandatory for anyone receiving dagpenge (unemployment benefits) — you must register here, log job applications, and maintain an active CV. Also used by public sector employers.", platforms:["Web"], requirements:["CPR number","MitID"], priority:"high", url:"https://www.jobnet.dk" },
-  { name:"Workindenmark.dk", category:"Work & Employment", description:"Official government portal for international job seekers. Lists 2,000–3,000 English-language vacancies from Danish employers. Also provides guidance on work permits, the Positive List (shortage occupations for fast-track permits), and Danish labour market rules.", platforms:["Web"], requirements:["None"], priority:"high", url:"https://www.workindenmark.dk" },
-  { name:"LinkedIn", category:"Work & Employment", description:"The dominant professional networking platform in Denmark with over 2 million Danish users. Used heavily for job search, networking, and employer research. Many Danish companies post exclusively on LinkedIn. Essential for white-collar and knowledge-worker roles.", platforms:["iOS","Android","Web"], requirements:["Account"], priority:"high", url:"https://www.linkedin.com" },
-  { name:"Frivilligjob.dk", category:"Work & Employment", description:"Denmark's leading platform for volunteer positions. Lists opportunities across NGOs, charities, cultural institutions, sports clubs, and social enterprises. Volunteering is deeply embedded in Danish civic life — also an effective way to build local networks and Danish-language skills while job searching.", platforms:["Web"], requirements:["None (account for applying)"], priority:"high", url:"https://www.frivilligjob.dk" },
-  { name:"Volunteering.dk", category:"Work & Employment", description:"Second major volunteering portal in Denmark, run by the Centre for Volunteering. Strong coverage of social and community volunteering — helplines, shelters, youth work, integration projects. Good English-language listings.", platforms:["Web"], requirements:["None"], priority:"medium", url:"https://www.volunteering.dk" },
-  { name:"FH – Fagbevægelsens Hovedorganisation", category:"Work & Employment", description:"The main confederation of Danish trade unions (fagforeninger), covering 65+ affiliated unions with over 1.3 million members. Use their website to find which union covers your profession or sector. Membership gives you contract review, legal support, and wage negotiation rights. There is no statutory minimum wage in Denmark; unions set the floor.", platforms:["Web"], requirements:["None (membership fees vary by union)"], priority:"high", url:"https://fho.dk/en" },
-  { name:"Key unions by sector", category:"Work & Employment", description:"Major Danish unions by sector: 3F (manual/unskilled workers), HK (office, retail, commerce), IDA (engineers), Djøf (lawyers, economists, social scientists), DM (academics in arts and humanities), FOA (public sector health and care), Dansk Metal (skilled metalworkers), Finansforbundet (financial sector). Cross-disciplinary options for newcomers: Krifa or Det Faglige Hus (accept all professions, English-friendly).", platforms:["Web"], requirements:["Employment or study in the relevant field"], priority:"high", url:"https://fho.dk/en/member-organisations" },
-  { name:"A-kasse (unemployment insurance fund)", category:"Work & Employment", description:"Separate from trade unions — an A-kasse is a voluntary unemployment insurance fund (dagpenge). You must join and pay contributions for at least one year before becoming eligible for benefits if you lose your job. Join as early as possible after arriving. EU/EEA citizens may transfer seniority from abroad (form PD U1, within 8 weeks of arrival). Common options: ASE, Krifa, or your sector union's A-kasse.", platforms:["Web"], requirements:["CPR number","Employment or intention to work in Denmark"], priority:"critical", url:"https://www.ase.dk/english" },
-  { name:"Akademikernes A-kasse (aka)", category:"Work & Employment", description:"A-kasse for university graduates across all disciplines. One of Denmark's largest and most international-friendly unemployment funds, with English-language support. Relevant for anyone with a bachelor's degree or higher.", platforms:["Web"], requirements:["Bachelor's degree or higher","CPR number"], priority:"medium", url:"https://aka.dk/english" },
-  { name:"Glassdoor DK", category:"Work & Employment", description:"International platform with a useful Danish presence for researching company salaries, culture, and interview processes. Helpful for benchmarking salary expectations in a market with no statutory minimum wage.", platforms:["iOS","Android","Web"], requirements:["Account"], priority:"medium", url:"https://www.glassdoor.com/Job/denmark-jobs-SRCH_IL.0,7_IN61.htm" },
-
-  // HOUSING
-  { name:"BoligPortal", category:"Housing", description:"Denmark's largest rental housing platform. Search for apartments and rooms, contact landlords, and manage rental listings. Essential for finding housing in the private market.", platforms:["iOS","Android","Web"], requirements:["Account (subscription for contacting landlords)"], priority:"high", url:"https://www.boligportal.dk/en/" },
-  { name:"Lejebolig.dk", category:"Housing", description:"Second major rental platform in Denmark. Overlapping but distinct listings from BoligPortal — worth checking both when apartment hunting.", platforms:["Web"], requirements:["Account"], priority:"high", url:"https://www.lejebolig.dk" },
-  { name:"DBA.dk", category:"Housing", description:"Denmark's main classifieds marketplace (like Craigslist/Kleinanzeigen). Used for second-hand furniture, bikes, electronics, and also some sublet listings.", platforms:["iOS","Android","Web"], requirements:["None (account for posting)"], priority:"medium", url:"https://www.dba.dk" },
-];
-
-// Build category order from data
-const categoryOrder = [...new Set(apps.map(a => a.category))];
-
-// Populate category filter
-const catSelect = document.getElementById('catFilter');
-categoryOrder.forEach(c => {
-  const opt = document.createElement('option');
-  opt.value = c;
-  opt.textContent = (categoryIcons[c] || '') + ' ' + c;
-  catSelect.appendChild(opt);
-});
+async function loadData() {
+  showLoading();
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    if (!res.ok) throw new Error('Network response not ok');
+    const text = await res.text();
+    const rows = parseCSV(text);
+    apps = rows.map(rowToApp).filter(Boolean);
+    initFilters();
+    render();
+  } catch(e) {
+    console.error('Failed to load sheet:', e);
+    showError();
+  }
+}
 
 let expandedCard = null;
 
@@ -354,7 +326,6 @@ function toggleCard(id) {
   const chev = document.getElementById('chev-' + id);
   if (!detail) return;
   const isOpen = detail.classList.contains('open');
-  // Close any open card
   if (expandedCard && expandedCard !== id) {
     const d = document.getElementById('detail-' + expandedCard);
     const c = document.getElementById('card-' + expandedCard);
@@ -415,7 +386,7 @@ function render() {
       </div>
       <div class="app-list">`;
 
-    items.forEach((app, i) => {
+    items.forEach((app) => {
       const p = priorityConfig[app.priority];
       const id = CSS.escape(app.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, ''));
       const platStr = app.platforms.map(pl => (platformIcons[pl] || '') + ' ' + pl).join(' · ');
@@ -456,7 +427,7 @@ function render() {
   expandedCard = null;
 }
 
-render();
+loadData();
 </script>
 </body>
 </html>
